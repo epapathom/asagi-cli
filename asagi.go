@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/urfave/cli/v2"
@@ -12,6 +11,35 @@ func main() {
 
 	app := &cli.App{
 		Commands: []*cli.Command{
+			{
+				Name:  "s3",
+				Usage: "provides S3 functionality",
+				Subcommands: []*cli.Command{
+					{
+						Name:  "upload",
+						Usage: "uploads files to an S3 bucket",
+						Flags: []cli.Flag{
+							&cli.StringFlag{
+								Name:     "filename",
+								Aliases:  []string{"f"},
+								Usage:    "the file to upload",
+								Required: true,
+							},
+							&cli.StringFlag{
+								Name:     "bucket",
+								Aliases:  []string{"b"},
+								Usage:    "the S3 bucket",
+								Required: true,
+							},
+						},
+						Action: func(context *cli.Context) error {
+							handleS3Upload(context, logger)
+
+							return nil
+						},
+					},
+				},
+			},
 			{
 				Name:  "ecs",
 				Usage: "provides ECS functionality",
@@ -27,15 +55,8 @@ func main() {
 								Required: true,
 							},
 						},
-						Action: func(c *cli.Context) error {
-							clusterName := c.String("cluster")
-
-							service := ASAGIService{}
-
-							service.logger = logger
-							service.getECSClient()
-							taskIds := service.getECSTaskIds(clusterName)
-							service.getTaskContainers(clusterName, taskIds)
+						Action: func(context *cli.Context) error {
+							handleECSTasks(context, logger)
 
 							return nil
 						},
@@ -43,52 +64,8 @@ func main() {
 					{
 						Name:  "exec",
 						Usage: "open a shell in a Fargate container",
-						Action: func(c *cli.Context) error {
-							var clusterName string
-							var taskId string
-							var containerName string
-
-							fmt.Print("ECS cluster name: ")
-							fmt.Scanln(&clusterName)
-
-							fmt.Print("ECS task ID: ")
-							fmt.Scanln(&taskId)
-
-							fmt.Print("ECS container name: ")
-							fmt.Scanln(&containerName)
-
-							service := ASAGIService{}
-
-							service.logger = logger
-							service.runECSExec(clusterName, taskId, containerName)
-
-							return nil
-						},
-					},
-				},
-			},
-			{
-				Name:  "cloudwatch",
-				Usage: "provides CloudWatch functionality",
-				Subcommands: []*cli.Command{
-					{
-						Name:  "export",
-						Usage: "exports metric widget images to a markdown file",
-						Action: func(c *cli.Context) error {
-
-							return nil
-						},
-					},
-				},
-			},
-			{
-				Name:  "s3",
-				Usage: "provides S3 functionality",
-				Subcommands: []*cli.Command{
-					{
-						Name:  "upload",
-						Usage: "uploads files to an S3 bucket",
-						Action: func(c *cli.Context) error {
+						Action: func(context *cli.Context) error {
+							handleECSExec(context, logger)
 
 							return nil
 						},
