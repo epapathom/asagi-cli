@@ -20,7 +20,7 @@ func main() {
 						Usage: "uploads files to an S3 bucket",
 						Flags: []cli.Flag{
 							&cli.StringFlag{
-								Name:     "filename",
+								Name:     "file",
 								Aliases:  []string{"f"},
 								Usage:    "the file to upload",
 								Required: true,
