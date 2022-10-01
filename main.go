@@ -1,7 +1,7 @@
 package main
 
-import "asagi/cmd"
+import "asagi/commands"
 
 func main() {
-	cmd.Execute()
+	commands.Execute()
 }
