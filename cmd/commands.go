@@ -1,14 +1,13 @@
-package main
+package cmd
 
 import (
+	"asagi/utils"
 	"os"
 
 	"github.com/urfave/cli/v2"
 )
 
-func main() {
-	logger := initializeLogger()
-
+func Execute() {
 	app := &cli.App{
 		Commands: []*cli.Command{
 			{
@@ -33,7 +32,7 @@ func main() {
 							},
 						},
 						Action: func(context *cli.Context) error {
-							handleS3Upload(context, logger)
+							handleS3Upload(context)
 
 							return nil
 						},
@@ -56,7 +55,7 @@ func main() {
 							},
 						},
 						Action: func(context *cli.Context) error {
-							handleECSTasks(context, logger)
+							handleECSTasks(context)
 
 							return nil
 						},
@@ -65,7 +64,7 @@ func main() {
 						Name:  "exec",
 						Usage: "open a shell in a Fargate container",
 						Action: func(context *cli.Context) error {
-							handleECSExec(context, logger)
+							handleECSExec(context)
 
 							return nil
 						},
@@ -77,6 +76,6 @@ func main() {
 
 	err := app.Run(os.Args)
 	if err != nil {
-		logger.Fatal(err)
+		utils.LoggerSingleton.Logger.Fatal(err)
 	}
 }

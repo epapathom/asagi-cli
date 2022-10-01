@@ -1,6 +1,7 @@
-package main
+package logic
 
 import (
+	"asagi/utils"
 	"context"
 	"fmt"
 	"os"
@@ -8,17 +9,33 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ecs"
 )
 
-func (service ASAGIService) getECSTaskIds(cluster string) (taskIds []string) {
+type ECS struct {
+	Client *ecs.Client
+}
+
+var ECSSingleton *ECS
+
+func (e *ECS) Init() {
+	config, err := config.LoadDefaultConfig(context.TODO())
+	if err != nil {
+		utils.LoggerSingleton.Logger.Error("configuration error: %v", err.Error())
+	}
+
+	e.Client = ecs.NewFromConfig(config)
+}
+
+func (e *ECS) GetECSTaskIds(cluster string) (taskIds []string) {
 	input := &ecs.ListTasksInput{
 		Cluster: aws.String(cluster),
 	}
 
-	response, err := service.ecsClient.ListTasks(context.TODO(), input)
+	response, err := e.Client.ListTasks(context.TODO(), input)
 	if err != nil {
-		service.logger.Fatal(err)
+		utils.LoggerSingleton.Logger.Fatal(err)
 	}
 
 	for _, taskArn := range response.TaskArns {
@@ -30,15 +47,15 @@ func (service ASAGIService) getECSTaskIds(cluster string) (taskIds []string) {
 	return
 }
 
-func (service ASAGIService) getTaskContainers(clusterName string, taskIds []string) {
+func (e *ECS) GetTaskContainers(clusterName string, taskIds []string) {
 	input := &ecs.DescribeTasksInput{
 		Tasks:   taskIds,
 		Cluster: aws.String(clusterName),
 	}
 
-	response, err := service.ecsClient.DescribeTasks(context.TODO(), input)
+	response, err := e.Client.DescribeTasks(context.TODO(), input)
 	if err != nil {
-		service.logger.Fatal(err)
+		utils.LoggerSingleton.Logger.Fatal(err)
 	}
 
 	fmt.Printf("ECS cluster: %s\n", clusterName)
@@ -58,7 +75,7 @@ func (service ASAGIService) getTaskContainers(clusterName string, taskIds []stri
 	}
 }
 
-func (service ASAGIService) runECSExec(clusterName string, taskId string, containerName string) {
+func (e *ECS) RunECSExec(clusterName string, taskId string, containerName string) {
 	commandString := fmt.Sprintf("aws ecs execute-command --cluster %s --task %s --container %s --interactive --command '/bin/sh'", clusterName, taskId, containerName)
 
 	command := exec.Command("bash", "-c", commandString)
@@ -68,6 +85,6 @@ func (service ASAGIService) runECSExec(clusterName string, taskId string, contai
 
 	err := command.Run()
 	if err != nil {
-		service.logger.Fatal(err)
+		utils.LoggerSingleton.Logger.Fatal(err)
 	}
 }

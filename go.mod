@@ -1,12 +1,11 @@
 module asagi
 
-go 1.18
+go 1.19
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.16.3
 	github.com/aws/aws-sdk-go-v2/config v1.15.4
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.11.7
-	github.com/aws/aws-sdk-go-v2/service/cloudwatch v1.18.0
 	github.com/aws/aws-sdk-go-v2/service/ecs v1.18.5
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.26.7
 	github.com/sirupsen/logrus v1.8.1
@@ -31,5 +30,5 @@ require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.1 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
-	golang.org/x/sys v0.0.0-20191026070338-33540a1f6037 // indirect
+	golang.org/x/sys v0.0.0-20220928140112-f11e5e49a4ec // indirect
 )
